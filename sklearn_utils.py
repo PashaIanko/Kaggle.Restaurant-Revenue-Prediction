@@ -3,6 +3,8 @@ import seaborn as sns
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import cross_validate
 import numpy as np
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
 
 '''
 def boxplot_regression(df_, cat_feature_, target_feature_)
@@ -66,6 +68,22 @@ plot_cv_results(
     scoring_='neg_mean_squared_error',
     to_put_minus_=True
 )
+
+def fit_grid_search(models_dict_, X_, Y_, cv_, scoring_)
+- Grid search for all models in the dictionary
+- USES MY CLASS MODEL, but not sklearn models!
+- Returns dictionary of grid search results
+- Example of usage:
+grid_search_results = fit_grid_search(
+    shortlisted_models,
+    X_=X_train_val,
+    Y_=Y_train_val,
+    cv_ = 5,
+    scoring_ = 'neg_mean_squared_error'
+)
+
+def fit_randomized_search(models_dict_, X_, Y_, cv_, n_iter_, scoring_)
+- Equivalent to fit_grid_search (but with RandomizedSearchCV)
 '''
 
 def boxplot_regression(df_, cat_feature_, target_feature_):
@@ -207,3 +225,46 @@ def plot_cv_results(
 
         ax.legend()
         ax.grid()
+
+
+def fit_grid_search(models_dict_, X_, Y_, cv_, scoring_):
+    res = {
+        name: None for name in list(models_dict_.keys())
+    }
+    for name, model in models_dict_.items():
+        print(f'Fitting {name}')
+        
+        grid_search_estimator = GridSearchCV(
+            model.model,
+            param_grid=model.grid_search_param_grid,
+            cv=cv_,
+            scoring=scoring_,
+            return_train_score=True,
+            refit=True
+        )
+
+        grid_search_result = grid_search_estimator.fit(X_, Y_)
+        res[name] = grid_search_result
+    return res
+
+
+def fit_randomized_search(models_dict_, X_, Y_, cv_, n_iter_, scoring_):
+    RANDOM_STATE = 42
+    res = {}
+    for name, model in models_dict_.items():
+        print(f'Fitting {name}')
+
+        estimator = RandomizedSearchCV(
+            model.model,
+            param_distributions=model.random_search_param_grid,
+            cv=cv_,
+            n_iter=n_iter_,
+            scoring=scoring_,
+            return_train_score=True,
+            refit=True,
+            random_state=RANDOM_STATE
+        )
+
+        rand_search_res = estimator.fit(X_, Y_)
+        res[name] = rand_search_res
+    return res
