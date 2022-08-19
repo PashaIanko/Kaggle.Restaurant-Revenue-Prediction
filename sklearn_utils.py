@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_validate
 import numpy as np
 
 '''
@@ -52,7 +53,19 @@ _ = print_model_cv_scores(
     scoring_='neg_mean_squared_error'
 )
 
-
+def plot_cv_results(sklearn_models_dict_, X_, Y_, cv_, scoring_, to_put_minus_=False)
+- Plots cross-validation metrics on seen and unseen data
+- Example of usage:
+plot_cv_results(
+    sklearn_models_dict_={
+        model_name: model.model for model_name, model in all_models.items()
+    },
+    X_=X_train_val,
+    Y_=Y_train_val,
+    cv_=5,
+    scoring_='neg_mean_squared_error',
+    to_put_minus_=True
+)
 '''
 
 def boxplot_regression(df_, cat_feature_, target_feature_):
@@ -155,3 +168,42 @@ def print_model_cv_scores(sklearn_models_dict_, X_, Y_, cv_, scoring_):
         print(f'Model: {model_name}, mean: {np.mean(scores)}, std: {np.std(scores)}')
 
     return sorted_res
+
+
+def plot_cv_results(
+    sklearn_models_dict_,
+    X_,
+    Y_,
+    cv_,
+    scoring_,
+    to_put_minus_=False
+):
+
+    for model_name, model in sklearn_models_dict_.items():
+        cv_res = cross_validate(
+            model,
+            X_,
+            Y_,
+            cv=cv_,
+            scoring=scoring_,
+            return_train_score=True
+        )
+        _, ax = plt.subplots()
+        x = np.arange(len(cv_res['test_score']))
+        width = 0.5
+        if to_put_minus_:
+            train_score = -cv_res['train_score']
+            test_score = -cv_res['test_score']
+        else:
+            train_score = cv_res['train_score']
+            test_score = cv_res['test_score']
+
+        ax.bar(x - width / 2, test_score, width, label='validation')
+        ax.bar(x + width / 2, train_score, width, label='train')
+
+        ax.set_title(f'Results for {model_name}')
+        ax.set_xlabel(f'CV fold number')
+        ax.set_ylabel(f'Metrics: {scoring_}')
+
+        ax.legend()
+        ax.grid()
