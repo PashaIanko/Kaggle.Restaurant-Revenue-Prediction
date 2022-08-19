@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import cross_val_score
+import numpy as np
 
 '''
 def boxplot_regression(df_, cat_feature_, target_feature_)
