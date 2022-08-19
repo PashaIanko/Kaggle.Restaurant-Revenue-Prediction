@@ -34,6 +34,23 @@ visualize_datasets_distributions(
     column_numbers_ = range(5),
     grid_width_=2
 )
+
+def print_model_cv_scores(sklearn_models_dict_, X_, Y_, cv_, scoring_)
+- Uses sklearn cross_val_score() function
+- Calculates average cross-validation score and outputs SORTED dictionary of results
+- Returns sorted dictionaty with models names and their average CV scores
+- Example of usage:
+_ = print_model_cv_scores(
+    sklearn_models_dict_={
+        model_name: model.model for model_name, model in all_models.items()
+    },
+    X_=X_train_val,
+    Y_=Y_train_val,
+    cv_=7,
+    scoring_='neg_mean_squared_error'
+)
+
+
 '''
 
 def boxplot_regression(df_, cat_feature_, target_feature_):
@@ -113,3 +130,26 @@ def visualize_datasets_distributions(
 
             ax[i, j].set_title(f'Column {cur_column_number}')
             ax[i, j].legend()
+
+
+def print_model_cv_scores(sklearn_models_dict_, X_, Y_, cv_, scoring_):
+    res = {}
+    for name, model in sklearn_models_dict_.items():
+        scores = cross_val_score(
+            model,
+            X_,
+            Y_,
+            cv=cv_,
+            scoring=scoring_
+        )
+        res[name] = scores
+    
+    # Sort the dict
+    sorted_res = {
+        k:v for \
+        k, v in sorted(res.items(), key = lambda item: np.mean(item[1]))
+    }
+    for model_name, scores in sorted_res.items():
+        print(f'Model: {model_name}, mean: {np.mean(scores)}, std: {np.std(scores)}')
+
+    return sorted_res
