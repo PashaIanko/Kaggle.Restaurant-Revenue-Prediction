@@ -306,3 +306,16 @@ def visualize_regression_predictions(
 
     ax.legend()
     ax.grid()
+    
+
+def dict_subset(dict_, keys_):
+    available_keys = dict_.keys()
+    res = {}
+    for key in keys_:
+        if key in available_keys:
+            res.update(
+                {
+                    key: dict_[key]
+                }
+            )
+    return res
