@@ -84,6 +84,16 @@ grid_search_results = fit_grid_search(
 
 def fit_randomized_search(models_dict_, X_, Y_, cv_, n_iter_, scoring_)
 - Equivalent to fit_grid_search (but with RandomizedSearchCV)
+
+def visualize_regression_predictions(sklearn_models_dict_, X_, Y_, dataset_type_)
+- Visualizes predictions of models in the dictionaty, on a given data
+- Example of usage:
+visualize_regression_predictions(
+    models,
+    X_=X_train_val,
+    Y_=Y_train_val,
+    dataset_type_='train set'
+)
 '''
 
 def boxplot_regression(df_, cat_feature_, target_feature_):
@@ -268,3 +278,31 @@ def fit_randomized_search(models_dict_, X_, Y_, cv_, n_iter_, scoring_):
         rand_search_res = estimator.fit(X_, Y_)
         res[name] = rand_search_res
     return res
+
+
+def visualize_regression_predictions(
+    sklearn_models_dict_,
+    X_,
+    Y_,
+    dataset_type_
+):
+    _, ax = plt.subplots()
+    ax.plot(
+        Y_,
+        label=f'{dataset_type_} target'
+    )
+
+    for model_name, model in sklearn_models_dict_.items():
+        predictions = model.predict(X_)
+        ax.scatter(
+            x=np.arange(len(predictions)),
+            y=predictions,
+            label=f'{model_name} predictions'
+        )
+
+    ax.set_xlabel('Dataset instance')
+    ax.set_ylabel('Prediction')
+    ax.set_title(f'Visualized predictons on {dataset_type_}')
+
+    ax.legend()
+    ax.grid()
