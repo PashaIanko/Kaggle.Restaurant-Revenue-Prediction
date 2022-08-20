@@ -57,6 +57,8 @@ _ = print_model_cv_scores(
 
 def plot_cv_results(sklearn_models_dict_, X_, Y_, cv_, scoring_, to_put_minus_=False)
 - Plots cross-validation metrics on seen and unseen data
+- Prints the average metrics result on SEEN folds and UNSEEN folds (functionality of print_model_cv_scores() function)
+- Fix seed np.random.seed() for reproducible results
 - Example of usage:
 plot_cv_results(
     sklearn_models_dict_={
@@ -198,6 +200,46 @@ def print_model_cv_scores(sklearn_models_dict_, X_, Y_, cv_, scoring_):
     return sorted_res
 
 
+def _print_sorted_results(cv_metrics_results_):
+    metrics_dict = {
+        model_name: {
+            'test_score': result['test_score'],
+            'train_score': result['train_score']
+        }
+        for model_name, result in cv_metrics_results_.items()
+    }
+
+    # Sort based on test score
+    metrics_dict_sorted = {
+        k: v for
+        k, v in sorted(
+            metrics_dict.items(),
+            key=lambda item: np.mean(item[1]['test_score'])
+        )
+    }
+
+    metrics_averaged_sorted = {
+        model_name: (np.mean(result['train_score']),
+                     np.std(result['train_score']),
+                     np.mean(result['test_score']),
+                     np.std(result['test_score']))
+        for model_name, result in metrics_dict_sorted.items()
+    }
+    headers = [
+        'Model',
+        'Seen folds avg score',
+        'Seen folds std',
+        'Unseen folds avg score',
+        'Unseen folds std'
+    ]
+    print(
+        tabulate(
+            [(k,) + v for k, v in metrics_averaged_sorted.items()],
+            headers=headers
+        )
+    )
+
+
 def plot_cv_results(
     sklearn_models_dict_,
     X_,
@@ -206,6 +248,8 @@ def plot_cv_results(
     scoring_,
     to_put_minus_=False
 ):
+
+    cv_metrics_results = {}
 
     for model_name, model in sklearn_models_dict_.items():
         cv_res = cross_validate(
@@ -226,6 +270,8 @@ def plot_cv_results(
             train_score = cv_res['train_score']
             test_score = cv_res['test_score']
 
+        cv_metrics_results[model_name] = cv_res
+
         ax.bar(x - width / 2, test_score, width, label='validation')
         ax.bar(x + width / 2, train_score, width, label='train')
 
@@ -235,6 +281,10 @@ def plot_cv_results(
 
         ax.legend()
         ax.grid()
+
+    _print_sorted_results(cv_metrics_results)
+
+    return cv_metrics_results
 
 
 def fit_grid_search(models_dict_, X_, Y_, cv_, scoring_):
