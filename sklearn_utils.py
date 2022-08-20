@@ -5,6 +5,7 @@ from sklearn.model_selection import cross_validate
 import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import RandomizedSearchCV
+from tabulate import tabulate
 
 '''
 def boxplot_regression(df_, cat_feature_, target_feature_)
