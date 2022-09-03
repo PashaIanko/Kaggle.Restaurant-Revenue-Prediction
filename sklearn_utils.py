@@ -22,8 +22,9 @@ def nan_statistics(df, nan_thresh=0.0)
 
 def visualize_datasets_distributions(
     dataframes_dict_, 
-    column_numbers_, 
-    grid_width_=3
+    columns_, 
+    grid_width_=3,
+    figwidth_
 )
 - plots a grid of histograms of grid_width
 - column_numbers_ - list of column numbers
@@ -33,12 +34,12 @@ and test data are from same distribution
 - Example of usage:
 visualize_datasets_distributions(
     {
-        'trainval': pd.DataFrame(trainval_sample_processed),
-        'test sample': pd.DataFrame(test_sample_processed),
-        'test': pd.DataFrame(test_processed)
+        'trainval': train_df,
+        'test': test_df,
     },
-    column_numbers_ = range(5),
-    grid_width_=2
+    columns_=list(test_df.columns),
+    grid_width_=2,
+    figwidth_=10
 )
 
 def print_model_cv_scores(sklearn_models_dict_, X_, Y_, cv_, scoring_)
@@ -147,34 +148,41 @@ def nan_statistics(df, nan_thresh=0.0):
 
 def visualize_datasets_distributions(
     dataframes_dict_,
-    column_numbers_,
-    grid_width_=3
+    columns_,
+    grid_width_=3,
+    figwidth_=10
 ):
     
-    n_plots = len(column_numbers_)
+    n_plots = len(columns_)
     if n_plots % grid_width_ == 0:
         grid_height = int(n_plots / grid_width_)
     else:
         grid_height = int(n_plots / grid_width_) + 1
         
-    _, ax = plt.subplots(grid_height, grid_width_, figsize=(10, 10))
+    
+    HEIGHT_RESOLUTION = 3.2
+
+    _, ax = plt.subplots(
+        grid_height,
+        grid_width_,
+        figsize=(figwidth_, int(HEIGHT_RESOLUTION * grid_height))
+    )
 
     for i in range(grid_height):
         for j in range(grid_width_):
             cur_column_number = i * (grid_width_) + j
             
-            if cur_column_number > n_plots:
+            if cur_column_number >= n_plots:
                 return
 
             columns_data = {}
             for dataset_name, df in dataframes_dict_.items():
                 columns_data[dataset_name] = df.values[:, cur_column_number]
             
-            
             for dataset_name, data in columns_data.items():
                 ax[i, j].hist(data, density=True, alpha=0.3, label=dataset_name)
 
-            ax[i, j].set_title(f'Column {cur_column_number}')
+            ax[i, j].set_title(f'{columns_[cur_column_number]}')
             ax[i, j].legend()
 
 
