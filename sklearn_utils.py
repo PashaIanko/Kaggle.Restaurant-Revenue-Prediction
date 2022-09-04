@@ -377,4 +377,6 @@ def dict_subset(dict_, keys_):
                     key: dict_[key]
                 }
             )
+        else:
+            print(f'Did not find {key} in dictionary')
     return res
